@@ -1,0 +1,1496 @@
+<html lang="zh-Hant"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海底撈一番賞 - 負責人: 77&amp;友倫</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --panel: rgba(15, 23, 42, 0.82);
+      --line: rgba(255,255,255,0.12);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --gold: #fbbf24;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --shadow: 0 20px 50px rgba(0,0,0,.35);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(99,102,241,0.35), transparent 28%),
+        radial-gradient(circle at top right, rgba(251,191,36,0.18), transparent 25%),
+        linear-gradient(140deg, var(--bg1), var(--bg2));
+      overflow-x: hidden;
+    }
+    .page { max-width: 1480px; margin: 0 auto; padding: 22px; }
+    .hero {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .hero-title {
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      font-weight: 900; letter-spacing: 1px; text-shadow: 0 6px 24px rgba(0,0,0,.28);
+    }
+    .hero-subtitle { color: var(--muted); margin-top: 6px; font-size: 0.96rem; }
+    .layout { display: grid; grid-template-columns: 400px minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); backdrop-filter: blur(16px);
+    }
+    .panel-inner { padding: 18px; }
+    h2, h3 { margin: 0 0 12px; }
+    h2 { font-size: 1.18rem; }
+    h3 { font-size: 1rem; }
+    .tiny, .muted { color: var(--muted); font-size: 0.92rem; }
+    .row { display: grid; grid-template-columns: 1fr 92px 42px; gap: 10px; margin-bottom: 10px; align-items: center; }
+    .row.head { margin-bottom: 8px; color: #e2e8f0; font-weight: 700; }
+    input, button { font: inherit; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); }
+    input[type="text"], input[type="number"] {
+      width: 100%; padding: 11px 12px; color: white; background: rgba(255,255,255,0.08); outline: none;
+    }
+    input:focus { border-color: rgba(251,191,36,.65); box-shadow: 0 0 0 3px rgba(251,191,36,.15); }
+    button {
+      cursor: pointer; padding: 11px 14px; color: white;
+      background: linear-gradient(180deg, rgba(99,102,241,.95), rgba(79,70,229,.95));
+      transition: transform .16s ease, filter .16s ease, opacity .16s ease; font-weight: 800;
+    }
+    button:hover { filter: brightness(1.07); }
+    button:active { transform: translateY(1px) scale(.99); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .secondary { background: rgba(255,255,255,0.08); }
+    .warning { background: linear-gradient(180deg, rgba(245,158,11,.95), rgba(217,119,6,.95)); }
+    .success { background: linear-gradient(180deg, rgba(34,197,94,.95), rgba(21,128,61,.95)); }
+    .danger { background: linear-gradient(180deg, rgba(239,68,68,.95), rgba(185,28,28,.95)); }
+    .gold {
+      background: linear-gradient(180deg, rgba(251,191,36,.98), rgba(217,119,6,.98));
+      color: #1f2937; border-color: rgba(255,255,255,0.18);
+    }
+    .settings-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .btn-stack > * + * { margin-top: 10px; }
+    .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .remove-btn { padding: 11px 0; background: rgba(239,68,68,.2); }
+    .note-box {
+      margin-top: 14px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.06);
+      border: 1px dashed rgba(255,255,255,.12); color: #e2e8f0; line-height: 1.6;
+    }
+    .nickname-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+    .stage-actions { display: grid; grid-template-columns: repeat(6, auto); gap: 10px; margin-top: 14px; }
+    .draw-display {
+      position: relative; margin-top: 16px; min-height: 290px; border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 26px 18px; overflow: hidden;
+    }
+    .draw-display::before {
+      content: ''; position: absolute; inset: -40%;
+      background: conic-gradient(from 0deg, rgba(251,191,36,0.08), rgba(96,165,250,0.08), rgba(251,191,36,0.08));
+      animation: spinBg 14s linear infinite; pointer-events: none;
+    }
+    .draw-display > * { position: relative; z-index: 1; }
+    @keyframes spinBg { to { transform: rotate(360deg); } }
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 7px 12px; border-radius: 999px;
+      background: rgba(255,255,255,0.09); color: #fef3c7; font-size: 0.92rem;
+    }
+    .spin-text {
+      font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; letter-spacing: 1px;
+      text-shadow: 0 8px 26px rgba(0,0,0,.3); min-height: 1.3em;
+    }
+    .result-name { margin-top: 14px; font-size: 1.05rem; font-weight: 700; }
+    .result-meta { margin-top: 8px; color: #dbeafe; min-height: 1.5em; }
+    .draw-display.jackpot { box-shadow: inset 0 0 0 2px rgba(251,191,36,.6), 0 0 40px rgba(251,191,36,.22); }
+    .stage-foot {
+      display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: #e2e8f0; margin-top: 12px;
+    }
+    .prize-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .prize-card {
+      position: relative; overflow: hidden; border-radius: 20px; padding: 16px; min-height: 132px;
+      color: white; box-shadow: 0 10px 24px rgba(0,0,0,.2);
+    }
+    .prize-card .label { font-size: 1.28rem; font-weight: 900; }
+    .prize-card .desc { margin-top: 8px; opacity: 0.92; }
+    .prize-card .qty {
+      margin-top: 16px; display: inline-flex; gap: 8px; padding: 7px 11px; border-radius: 999px;
+      background: rgba(255,255,255,0.18); font-size: 0.92rem;
+    }
+    .remaining-wrap { display: grid; gap: 18px; }
+    .summary-card {
+      padding: 12px 13px; border-radius: 18px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .summary-card + .summary-card { margin-top: 10px; }
+    .summary-grid {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px;
+    }
+    .prize-tag { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(255,255,255,0.06); }
+    .remain-number { font-size: 1.3rem; font-weight: 900; }
+    .winner-pill {
+      display: inline-block; margin: 4px 6px 0 0; padding: 5px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); font-size: 0.88rem;
+    }
+    .logs { margin-top: 16px; }
+    .log-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .log-item {
+      min-height: 92px; border-radius: 16px; padding: 10px; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .log-no { font-size: 0.82rem; color: #cbd5e1; }
+    .log-name { margin-top: 8px; font-weight: 800; }
+    .log-prize { margin-top: 4px; color: #fef08a; font-weight: 700; }
+    .log-empty { margin-top: 7px; color: #94a3b8; font-size: 0.9rem; }
+    #fireworks {
+      position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; opacity: 0;
+      transition: opacity .2s ease;
+    }
+    #fireworks.show { opacity: 1; }
+    .floating-admin {
+      position: fixed; right: 18px; bottom: 18px; z-index: 25; display: flex; gap: 10px;
+    }
+    .settings-hidden .settings-panel { display: none; }
+    .settings-hidden .layout { grid-template-columns: minmax(0, 1fr) 320px; }
+    .locked-mode .settings-panel,
+    .locked-mode .floating-admin,
+    .locked-mode #showSettingsBtn,
+    .locked-mode #hideSettingsBtn,
+    .locked-mode #addPrizeBtn,
+    .locked-mode #applyConfigBtn,
+    .locked-mode #exportBtn,
+    .locked-mode #resetBtn,
+    .locked-mode .admin-only,
+    .locked-mode .settings-only,
+    .export-hidden {
+      display: none !important;
+    }
+    .title-wrap { margin-bottom: 14px; }
+    .title-wrap label { display: block; margin-bottom: 8px; font-weight: 800; }
+    @media (max-width: 1180px) {
+      .layout, .settings-hidden .layout { grid-template-columns: 1fr; }
+      .remaining-wrap { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 820px) {
+      .nickname-bar, .stage-actions, .btn-grid { grid-template-columns: 1fr; }
+      .log-grid { grid-template-columns: repeat(2, 1fr); }
+      .row { grid-template-columns: 1fr 90px 42px; }
+      .prize-cards, .remaining-wrap { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .page { padding: 14px; }
+      .log-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworks"></canvas>
+  <div class="floating-admin" id="floatingAdmin">
+    <button class="warning" id="toggleSettingsBtn">隱藏設定區</button>
+  </div>
+
+  <div class="page" id="pageRoot">
+    <div class="hero">
+      <div>
+        <div class="hero-title" id="appTitleDisplay">海底撈一番賞 - 負責人: 77&amp;友倫</div>
+        <div class="hero-subtitle">可自訂獎品、即時剩餘數量、50格抽獎紀錄、排行榜、抽獎音效與頭獎煙火。</div>
+      </div>
+      <div class="tiny" id="modeTip">目前模式：製作 / 管理模式</div>
+    </div>
+
+    <div class="layout" id="mainLayout">
+      <section class="panel settings-panel" id="settingsPanel">
+        <div class="panel-inner">
+          <div class="settings-top">
+            <div>
+              <h2>獎品設定區</h2>
+              <div class="tiny">匯出活動版 HTML 後，這裡會自動隱藏。</div>
+            </div>
+            <button class="secondary settings-only" id="hideSettingsBtn">隱藏</button>
+          </div>
+
+          <div class="title-wrap">
+            <label for="titleInput">活動名稱</label>
+            <input id="titleInput" type="text" maxlength="60" placeholder="例如：動漫一番賞抽獎活動">
+          </div>
+
+          <div class="row head">
+            <div>獎項名稱 / 內容</div>
+            <div>數量</div>
+            <div></div>
+          </div>
+          <div class="prize-list" id="prizeList"><div class="row"><input type="text" placeholder="頭獎名稱"><input type="number" min="1" step="1" disabled=""><button class="remove-btn settings-only" title="頭獎不可刪除" disabled="">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div><div class="row"><input type="text" placeholder="例如 A賞 / B賞 / 立牌 / 公仔"><input type="number" min="0" step="1"><button class="remove-btn settings-only" title="刪除此獎項">✕</button></div></div>
+
+          <div class="btn-stack" style="margin-top:12px;">
+            <button class="secondary settings-only" id="addPrizeBtn">＋ 新增獎項</button>
+            <div class="btn-grid">
+              <button class="success settings-only" id="applyConfigBtn">套用設定</button>
+              <button class="warning settings-only" id="exportBtn">匯出活動版 HTML</button>
+            </div>
+            <button class="danger settings-only" id="resetBtn">重置抽獎</button>
+          </div>
+
+          <div class="note-box">
+            <strong>規則：</strong><br>
+            1. 第一列固定為頭獎，數量永遠只有 1。<br>
+            2. 你可以新增 A賞 / B賞 / C賞 / D賞… 或直接填入任何獎品名稱。<br>
+            3. 套用設定後才會更新抽獎池與右側剩餘數量。<br>
+            4. 匯出 HTML 後會自動隱藏設定區，且只能抽獎與重置本場。
+          </div>
+        </div>
+      </section>
+
+      <section class="panel center-stage">
+        <div class="panel-inner">
+          <div class="nickname-bar">
+            <input id="nicknameInput" type="text" maxlength="24" placeholder="請輸入抽獎人暱稱，例如：小明">
+            <button class="gold" id="drawBtn">開始抽獎</button>
+          </div>
+
+          <div class="draw-display" id="drawDisplay">
+            <div class="status-chip" id="statusChip">等待抽獎</div>
+            <div class="spin-text" id="spinText">準備好了就開始抽！</div>
+            <div class="result-name" id="resultName">輸入暱稱後按下「開始抽獎」</div>
+            <div class="result-meta" id="resultMeta">頭獎固定只有 1 格，其他獎項數量由你設定。</div>
+          </div>
+
+          <div class="stage-actions">
+            <button class="secondary" id="soundToggleBtn">音效：開啟</button>
+            <button class="secondary settings-only" id="showSettingsBtn">顯示設定區</button>
+            <button class="secondary" id="copyLogsBtn">複製紀錄</button>
+            <button class="secondary" id="exportStateBtn">匯出紀錄</button>
+            <button class="secondary" id="importStateBtn">匯入紀錄</button>
+            <button class="danger" id="exportedResetBtn">重置本場抽獎</button>
+          </div>
+
+          <input type="file" id="importStateInput" accept=".json" style="display:none;">
+
+          <div class="stage-foot">
+            <div id="poolInfo">總籤數：50</div>
+            <div id="remainingInfo">剩餘可抽：50</div>
+          </div>
+
+          <div class="prize-cards" id="prizeCards"><div class="prize-card" style="background: linear-gradient(135deg, rgb(252, 211, 77), rgb(245, 158, 11) 58%, rgb(180, 83, 9));">
+          <div class="label">A賞:單局賭約1888萬不出不結單</div>
+          <div class="desc">唯一頭獎 / 只有 1 格</div>
+          <div class="qty">初始數量：1　剩餘：1</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(139, 92, 246), rgb(99, 102, 241));">
+          <div class="label">B賞:單局賭約1688萬不出不結單</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：2　剩餘：2</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(6, 182, 212), rgb(37, 99, 235));">
+          <div class="label">C賞:單局賭約1488萬不出不結單</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：3　剩餘：3</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(34, 197, 94), rgb(22, 163, 74));">
+          <div class="label">D賞:單局賭約1388萬不出不結單</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：4　剩餘：4</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(249, 115, 22), rgb(239, 68, 68));">
+          <div class="label">E賞:單局賭約1288萬不出不結單</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：6　剩餘：6</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119));">
+          <div class="label">F賞:兩局內機密場出小紅以上送一抽</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：11　剩餘：11</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(20, 184, 166), rgb(15, 118, 110));">
+          <div class="label">G賞:兩局內機密場出大紅以上送一抽</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：11　剩餘：11</div>
+        </div><div class="prize-card" style="background: linear-gradient(135deg, rgb(132, 204, 22), rgb(101, 163, 13));">
+          <div class="label">H賞:兩局內機密場累積得吃2400萬送一抽</div>
+          <div class="desc">可自訂內容物與數量</div>
+          <div class="qty">初始數量：12　剩餘：12</div>
+        </div></div>
+
+          <div class="logs">
+            <h2>抽獎紀錄（50格）</h2>
+            <div class="tiny">會顯示最新 50 筆。超過後會自動移除最舊紀錄。</div>
+            <div class="log-grid" id="logGrid"><div class="log-item">
+            <div class="log-no">#1</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#2</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#3</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#4</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#5</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#6</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#7</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#8</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#9</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#10</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#11</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#12</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#13</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#14</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#15</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#16</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#17</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#18</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#19</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#20</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#21</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#22</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#23</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#24</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#25</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#26</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#27</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#28</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#29</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#30</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#31</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#32</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#33</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#34</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#35</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#36</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#37</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#38</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#39</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#40</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#41</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#42</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#43</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#44</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#45</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#46</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#47</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#48</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#49</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div><div class="log-item">
+            <div class="log-no">#50</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          </div></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="remaining-wrap">
+        <section class="panel">
+          <div class="panel-inner">
+            <h2>即時剩餘數量</h2>
+            <div class="tiny">每抽一次會自動更新。</div>
+            <div id="remainingList" style="margin-top:14px;"><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#fbbf24"></span>
+              <span>A賞:單局賭約1888萬不出不結單</span>
+            </div>
+            <div class="remain-number">1</div>
+          </div>
+          <div class="tiny">初始 1 個（固定唯一頭獎）</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#c4b5fd"></span>
+              <span>B賞:單局賭約1688萬不出不結單</span>
+            </div>
+            <div class="remain-number">2</div>
+          </div>
+          <div class="tiny">初始 2 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#67e8f9"></span>
+              <span>C賞:單局賭約1488萬不出不結單</span>
+            </div>
+            <div class="remain-number">3</div>
+          </div>
+          <div class="tiny">初始 3 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#86efac"></span>
+              <span>D賞:單局賭約1388萬不出不結單</span>
+            </div>
+            <div class="remain-number">4</div>
+          </div>
+          <div class="tiny">初始 4 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#fdba74"></span>
+              <span>E賞:單局賭約1288萬不出不結單</span>
+            </div>
+            <div class="remain-number">6</div>
+          </div>
+          <div class="tiny">初始 6 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#f9a8d4"></span>
+              <span>F賞:兩局內機密場出小紅以上送一抽</span>
+            </div>
+            <div class="remain-number">11</div>
+          </div>
+          <div class="tiny">初始 11 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#5eead4"></span>
+              <span>G賞:兩局內機密場出大紅以上送一抽</span>
+            </div>
+            <div class="remain-number">11</div>
+          </div>
+          <div class="tiny">初始 11 個</div>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#bef264"></span>
+              <span>H賞:兩局內機密場累積得吃2400萬送一抽</span>
+            </div>
+            <div class="remain-number">12</div>
+          </div>
+          <div class="tiny">初始 12 個</div>
+        </div></div>
+          </div>
+        </section>
+
+        <section class="panel leaderboard-wrap">
+          <div class="panel-inner">
+            <h2>中獎排行榜</h2>
+            <div class="tiny">顯示目前各獎項已抽中的名單。</div>
+            <div id="leaderboardList" style="margin-top:14px;"><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#fbbf24"></span>
+              <span>A賞:單局賭約1888萬不出不結單</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#c4b5fd"></span>
+              <span>B賞:單局賭約1688萬不出不結單</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#67e8f9"></span>
+              <span>C賞:單局賭約1488萬不出不結單</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#86efac"></span>
+              <span>D賞:單局賭約1388萬不出不結單</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#fdba74"></span>
+              <span>E賞:單局賭約1288萬不出不結單</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#f9a8d4"></span>
+              <span>F賞:兩局內機密場出小紅以上送一抽</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#5eead4"></span>
+              <span>G賞:兩局內機密場出大紅以上送一抽</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div><div class="summary-card">
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:#bef264"></span>
+              <span>H賞:兩局內機密場累積得吃2400萬送一抽</span>
+            </div>
+            <div class="remain-number">已中 0</div>
+          </div>
+          <span class="winner-pill">目前尚未有人抽中</span>
+        </div></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const EXPORT_HIDE_SETTINGS = true;
+    const LOCK_EXPORTED_MODE = true;
+    const DEFAULT_TITLE = '海底撈一番賞 - 負責人: 77&友倫';
+    const DEFAULT_PRIZES = [
+  {
+    "name": "A賞:單局賭約1888萬不出不結單",
+    "qty": 1
+  },
+  {
+    "name": "B賞:單局賭約1688萬不出不結單",
+    "qty": 2
+  },
+  {
+    "name": "C賞:單局賭約1488萬不出不結單",
+    "qty": 3
+  },
+  {
+    "name": "D賞:單局賭約1388萬不出不結單",
+    "qty": 4
+  },
+  {
+    "name": "E賞:單局賭約1288萬不出不結單",
+    "qty": 6
+  },
+  {
+    "name": "F賞:兩局內機密場出小紅以上送一抽",
+    "qty": 11
+  },
+  {
+    "name": "G賞:兩局內機密場出大紅以上送一抽",
+    "qty": 11
+  },
+  {
+    "name": "H賞:兩局內機密場累積得吃2400萬送一抽",
+    "qty": 12
+  }
+];
+
+    let appTitle = DEFAULT_TITLE;
+    let configPrizes = [];
+    let prizeStock = [];
+    let initialPrizeStock = [];
+    let drawPool = [];
+    let logs = [];
+    let soundEnabled = true;
+    let isDrawing = false;
+
+    const STORAGE_KEY = `lottery_state::${location.pathname}`;
+
+
+    const pageRoot = document.getElementById('pageRoot');
+    const modeTip = document.getElementById('modeTip');
+    const appTitleDisplay = document.getElementById('appTitleDisplay');
+    const titleInput = document.getElementById('titleInput');
+    const prizeList = document.getElementById('prizeList');
+    const prizeCards = document.getElementById('prizeCards');
+    const remainingList = document.getElementById('remainingList');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const logGrid = document.getElementById('logGrid');
+    const statusChip = document.getElementById('statusChip');
+    const spinText = document.getElementById('spinText');
+    const resultName = document.getElementById('resultName');
+    const resultMeta = document.getElementById('resultMeta');
+    const drawDisplay = document.getElementById('drawDisplay');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const drawBtn = document.getElementById('drawBtn');
+    const poolInfo = document.getElementById('poolInfo');
+    const remainingInfo = document.getElementById('remainingInfo');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+    const showSettingsBtn = document.getElementById('showSettingsBtn');
+    const hideSettingsBtn = document.getElementById('hideSettingsBtn');
+    const addPrizeBtn = document.getElementById('addPrizeBtn');
+    const applyConfigBtn = document.getElementById('applyConfigBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const copyLogsBtn = document.getElementById('copyLogsBtn');
+    const exportStateBtn = document.getElementById('exportStateBtn');
+    const importStateBtn = document.getElementById('importStateBtn');
+    const importStateInput = document.getElementById('importStateInput');
+    const exportedResetBtn = document.getElementById('exportedResetBtn');
+
+    function deepClone(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function sanitizeName(name, fallback) {
+      const text = String(name ?? '').trim();
+      return text || fallback;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getPrizeColor(name, index) {
+      const n = String(name).toUpperCase();
+      if (index === 0 || n.includes('頭獎') || n.includes('特賞') || n.includes('大獎')) {
+        return 'linear-gradient(135deg, #fcd34d, #f59e0b 58%, #b45309)';
+      }
+      const palette = [
+        'linear-gradient(135deg, #8b5cf6, #6366f1)',
+        'linear-gradient(135deg, #06b6d4, #2563eb)',
+        'linear-gradient(135deg, #22c55e, #16a34a)',
+        'linear-gradient(135deg, #f97316, #ef4444)',
+        'linear-gradient(135deg, #ec4899, #db2777)',
+        'linear-gradient(135deg, #14b8a6, #0f766e)',
+        'linear-gradient(135deg, #84cc16, #65a30d)',
+        'linear-gradient(135deg, #a855f7, #7c3aed)'
+      ];
+      return palette[(index - 1 + palette.length) % palette.length];
+    }
+
+    function textColorByPrize(name, index) {
+      if (index === 0 || String(name).includes('頭獎')) return '#fbbf24';
+      const colors = ['#c4b5fd','#67e8f9','#86efac','#fdba74','#f9a8d4','#5eead4','#bef264','#d8b4fe'];
+      return colors[(index - 1 + colors.length) % colors.length];
+    }
+
+
+    function saveState() {
+      try {
+        const state = {
+          appTitle,
+          configPrizes,
+          prizeStock,
+          initialPrizeStock,
+          drawPool,
+          logs,
+          soundEnabled,
+          titleValue: titleInput ? titleInput.value : appTitle
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn('無法儲存抽獎狀態', error);
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (!state || !Array.isArray(state.prizeStock) || !Array.isArray(state.logs)) return false;
+
+        appTitle = state.appTitle || DEFAULT_TITLE;
+        configPrizes = Array.isArray(state.configPrizes) && state.configPrizes.length
+          ? state.configPrizes
+          : deepClone(DEFAULT_PRIZES);
+        prizeStock = state.prizeStock;
+        initialPrizeStock = Array.isArray(state.initialPrizeStock) && state.initialPrizeStock.length
+          ? state.initialPrizeStock
+          : deepClone(state.prizeStock);
+        drawPool = Array.isArray(state.drawPool) ? state.drawPool : [];
+        logs = state.logs;
+        soundEnabled = typeof state.soundEnabled === 'boolean' ? state.soundEnabled : true;
+
+        if (titleInput) titleInput.value = state.titleValue || appTitle;
+        if (appTitleDisplay) appTitleDisplay.textContent = appTitle;
+        document.title = appTitle;
+        return true;
+      } catch (error) {
+        console.warn('無法讀取抽獎狀態，將使用預設值', error);
+        return false;
+      }
+    }
+
+    function clearSavedState() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.warn('無法清除抽獎狀態', error);
+      }
+    }
+
+    function createDefaultConfig() {
+      configPrizes = deepClone(DEFAULT_PRIZES);
+      appTitle = DEFAULT_TITLE;
+      titleInput.value = DEFAULT_TITLE;
+      appTitleDisplay.textContent = DEFAULT_TITLE;
+      document.title = DEFAULT_TITLE;
+    }
+
+    function applyTitleFromInput() {
+      appTitle = sanitizeName(titleInput.value, DEFAULT_TITLE);
+      titleInput.value = appTitle;
+      appTitleDisplay.textContent = appTitle;
+      document.title = appTitle;
+      saveState();
+    }
+
+    function renderPrizeInputs() {
+      prizeList.innerHTML = '';
+      configPrizes.forEach((prize, index) => {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = prize.name;
+        nameInput.placeholder = index === 0 ? '頭獎名稱' : '例如 A賞 / B賞 / 立牌 / 公仔';
+        nameInput.disabled = LOCK_EXPORTED_MODE;
+        nameInput.addEventListener('input', (e) => {
+          configPrizes[index].name = e.target.value;
+        });
+
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.min = index === 0 ? '1' : '0';
+        qtyInput.step = '1';
+        qtyInput.value = index === 0 ? 1 : prize.qty;
+        qtyInput.disabled = LOCK_EXPORTED_MODE || index === 0;
+        qtyInput.addEventListener('input', (e) => {
+          const num = Math.max(0, parseInt(e.target.value || '0', 10));
+          configPrizes[index].qty = index === 0 ? 1 : num;
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn settings-only';
+        removeBtn.textContent = '✕';
+        removeBtn.title = index === 0 ? '頭獎不可刪除' : '刪除此獎項';
+        removeBtn.disabled = LOCK_EXPORTED_MODE || index === 0;
+        removeBtn.addEventListener('click', () => {
+          if (LOCK_EXPORTED_MODE || index === 0) return;
+          configPrizes.splice(index, 1);
+          renderPrizeInputs();
+        });
+
+        row.appendChild(nameInput);
+        row.appendChild(qtyInput);
+        row.appendChild(removeBtn);
+        prizeList.appendChild(row);
+      });
+    }
+
+    function getNormalizedConfig() {
+      return configPrizes
+        .map((p, index) => ({
+          name: sanitizeName(p.name, index === 0 ? '頭獎' : `獎項${index}`),
+          qty: index === 0 ? 1 : Math.max(0, parseInt(p.qty || 0, 10))
+        }))
+        .filter((p, index) => index === 0 || p.qty > 0);
+    }
+
+    function rebuildPool() {
+      drawPool = [];
+      prizeStock.forEach((p) => {
+        for (let i = 0; i < p.remaining; i += 1) drawPool.push(p.name);
+      });
+    }
+
+    function updateResultToIdle() {
+      drawDisplay.classList.remove('jackpot');
+      statusChip.textContent = '等待抽獎';
+      spinText.className = 'spin-text';
+      spinText.textContent = '準備好了就開始抽！';
+      spinText.style.color = '';
+      resultName.textContent = '輸入暱稱後按下「開始抽獎」';
+      resultMeta.textContent = '頭獎固定只有 1 格，其他獎項數量由你設定。';
+    }
+
+    function applyConfig(resetLogs = true) {
+      applyTitleFromInput();
+      const normalized = getNormalizedConfig();
+      if (!normalized.length) return;
+      normalized[0].qty = 1;
+      configPrizes = deepClone(normalized.map((p, i) => ({ ...p, fixedJackpot: i === 0 })));
+      prizeStock = configPrizes.map((p, i) => ({
+        name: p.name,
+        initialQty: i === 0 ? 1 : p.qty,
+        remaining: i === 0 ? 1 : p.qty,
+        fixedJackpot: i === 0
+      }));
+      initialPrizeStock = deepClone(prizeStock);
+      rebuildPool();
+      if (resetLogs) logs = [];
+      renderAll();
+      updateResultToIdle();
+      saveState();
+    }
+
+    function resetToInitialState() {
+      prizeStock = deepClone(initialPrizeStock);
+      rebuildPool();
+      logs = [];
+      isDrawing = false;
+      nicknameInput.value = '';
+      renderAll();
+      updateResultToIdle();
+      saveState();
+    }
+
+    function renderPrizeCards() {
+      prizeCards.innerHTML = '';
+      prizeStock.forEach((p, index) => {
+        const card = document.createElement('div');
+        card.className = 'prize-card';
+        card.style.background = getPrizeColor(p.name, index);
+        card.innerHTML = `
+          <div class="label">${escapeHtml(p.name)}</div>
+          <div class="desc">${index === 0 ? '唯一頭獎 / 只有 1 格' : '可自訂內容物與數量'}</div>
+          <div class="qty">初始數量：${p.initialQty}　剩餘：${p.remaining}</div>
+        `;
+        prizeCards.appendChild(card);
+      });
+    }
+
+    function renderRemaining() {
+      remainingList.innerHTML = '';
+      prizeStock.forEach((p, index) => {
+        const item = document.createElement('div');
+        item.className = 'summary-card';
+        item.innerHTML = `
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:${textColorByPrize(p.name, index)}"></span>
+              <span>${escapeHtml(p.name)}</span>
+            </div>
+            <div class="remain-number">${p.remaining}</div>
+          </div>
+          <div class="tiny">初始 ${p.initialQty} 個${index === 0 ? '（固定唯一頭獎）' : ''}</div>
+        `;
+        remainingList.appendChild(item);
+      });
+    }
+
+    function renderLeaderboard() {
+      leaderboardList.innerHTML = '';
+      prizeStock.forEach((p, index) => {
+        const winners = logs.filter((l) => l.prize === p.name).map((l) => l.nickname);
+        const item = document.createElement('div');
+        item.className = 'summary-card';
+        const winnerHtml = winners.length
+          ? winners.map((w, idx) => `<span class="winner-pill">${idx + 1}. ${escapeHtml(w)}</span>`).join('')
+          : '<span class="winner-pill">目前尚未有人抽中</span>';
+        item.innerHTML = `
+          <div class="summary-grid">
+            <div class="prize-tag">
+              <span class="dot" style="background:${textColorByPrize(p.name, index)}"></span>
+              <span>${escapeHtml(p.name)}</span>
+            </div>
+            <div class="remain-number">已中 ${winners.length}</div>
+          </div>
+          ${winnerHtml}
+        `;
+        leaderboardList.appendChild(item);
+      });
+    }
+
+    function renderLogs() {
+      logGrid.innerHTML = '';
+      const latest = logs.slice(-50);
+      for (let i = 0; i < 50; i += 1) {
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        const log = latest[i];
+        if (log) {
+          item.innerHTML = `
+            <div class="log-no">#${i + 1}</div>
+            <div class="log-name">${escapeHtml(log.nickname)}</div>
+            <div class="log-prize">${escapeHtml(log.prize)}</div>
+          `;
+        } else {
+          item.innerHTML = `
+            <div class="log-no">#${i + 1}</div>
+            <div class="log-empty">尚無紀錄</div>
+            <div class="log-empty">等待抽獎中</div>
+          `;
+        }
+        logGrid.appendChild(item);
+      }
+    }
+
+    function renderInfo() {
+      const total = prizeStock.reduce((sum, p) => sum + p.initialQty, 0);
+      const remain = prizeStock.reduce((sum, p) => sum + p.remaining, 0);
+      poolInfo.textContent = `總籤數：${total}`;
+      remainingInfo.textContent = `剩餘可抽：${remain}`;
+      drawBtn.disabled = isDrawing || remain <= 0;
+      if (remain <= 0 && !isDrawing) {
+        statusChip.textContent = '已抽完';
+        resultMeta.textContent = '所有獎項都已抽出，可以按「重置本場抽獎」重新開始。';
+      }
+    }
+
+    function syncModeTip() {
+      if (LOCK_EXPORTED_MODE) {
+        modeTip.textContent = '目前模式：活動模式（已鎖定，只能抽獎）';
+        return;
+      }
+      const hidden = pageRoot.classList.contains('settings-hidden');
+      modeTip.textContent = hidden ? '目前模式：活動模式（設定區已隱藏）' : '目前模式：製作 / 管理模式';
+    }
+
+    function renderAll() {
+      renderPrizeInputs();
+      renderPrizeCards();
+      renderRemaining();
+      renderLeaderboard();
+      renderLogs();
+      renderInfo();
+      syncModeTip();
+    }
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)] || '抽獎中…';
+    }
+
+    function ensureAudioContext() {
+      if (!window.AudioContext && !window.webkitAudioContext) return null;
+      if (!window.__lotteryAudioContext) {
+        window.__lotteryAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return window.__lotteryAudioContext;
+    }
+
+    function playTone(freq, duration = 0.15, type = 'sine', gainValue = 0.04) {
+      if (!soundEnabled) return;
+      const ctx = ensureAudioContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(gainValue, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    }
+
+    function playSpinSound(step = 0) {
+      const tones = [420, 480, 520, 620, 740, 680, 560];
+      playTone(tones[step % tones.length], 0.08, 'square', 0.03);
+    }
+
+    function playWinSound() {
+      [660, 880, 990].forEach((t, i) => setTimeout(() => playTone(t, 0.18, 'triangle', 0.05), i * 120));
+    }
+
+    function playJackpotSound() {
+      [523, 659, 784, 1046].forEach((t, i) => setTimeout(() => playTone(t, 0.28, 'sawtooth', 0.06), i * 140));
+    }
+
+    function launchFireworks() {
+      const canvas = document.getElementById('fireworks');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      canvas.classList.add('show');
+
+      const particles = [];
+      for (let burst = 0; burst < 7; burst += 1) {
+        const cx = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+        const cy = Math.random() * window.innerHeight * 0.45 + 80;
+        for (let i = 0; i < 65; i += 1) {
+          const angle = (Math.PI * 2 * i) / 65 + Math.random() * 0.2;
+          const speed = Math.random() * 4 + 2.2;
+          particles.push({
+            x: cx,
+            y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: Math.random() * 0.018 + 0.012,
+            size: Math.random() * 2.8 + 1.4,
+            color: ['#fbbf24','#f472b6','#60a5fa','#34d399','#f87171','#c084fc'][i % 6]
+          });
+        }
+      }
+
+      let frame = 0;
+      function tick() {
+        frame += 1;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.03;
+          p.life -= p.decay;
+        });
+        for (const p of particles) {
+          if (p.life <= 0) continue;
+          ctx.globalAlpha = Math.max(p.life, 0);
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        if (frame < 115) requestAnimationFrame(tick);
+        else {
+          canvas.classList.remove('show');
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    async function drawLottery() {
+      const nickname = nicknameInput.value.trim();
+      if (!nickname) {
+        alert('請先輸入抽獎人暱稱。');
+        nicknameInput.focus();
+        return;
+      }
+      if (isDrawing) return;
+      if (!drawPool.length) {
+        alert('目前沒有可抽的獎項，請先套用設定或重置。');
+        return;
+      }
+
+      isDrawing = true;
+      renderInfo();
+      drawDisplay.classList.remove('jackpot');
+      statusChip.textContent = '抽獎中…';
+      resultName.textContent = `抽獎人：${nickname}`;
+      resultMeta.textContent = '請稍候，正在抽出幸運獎項…';
+      spinText.className = 'spin-text';
+
+      const spinNames = prizeStock.flatMap((p) => {
+        const repeat = Math.max(2, Math.min(8, p.remaining + 1));
+        return Array.from({ length: repeat }, () => p.name);
+      });
+
+      const duration = 2400;
+      const stepTime = 80;
+      const steps = Math.floor(duration / stepTime);
+      for (let i = 0; i < steps; i += 1) {
+        const currentName = randomFrom(spinNames);
+        const currentIndex = prizeStock.findIndex((p) => p.name === currentName);
+        spinText.textContent = currentName;
+        spinText.style.color = textColorByPrize(currentName, Math.max(currentIndex, 0));
+        playSpinSound(i);
+        await new Promise(resolve => setTimeout(resolve, stepTime + Math.min(i * 2, 70)));
+      }
+
+      const pickIndex = Math.floor(Math.random() * drawPool.length);
+      const prizeName = drawPool[pickIndex];
+      const prizeIndex = prizeStock.findIndex((p) => p.name === prizeName);
+      if (prizeIndex === -1) {
+        isDrawing = false;
+        renderInfo();
+        return;
+      }
+
+      prizeStock[prizeIndex].remaining -= 1;
+      rebuildPool();
+      logs.push({ nickname, prize: prizeName, time: new Date().toISOString() });
+      if (logs.length > 50) logs = logs.slice(-50);
+
+      spinText.className = 'spin-text';
+      spinText.textContent = prizeName;
+      spinText.style.color = textColorByPrize(prizeName, prizeIndex);
+      resultName.textContent = `抽獎人：${nickname}`;
+
+      const remain = prizeStock[prizeIndex].remaining;
+      const isJackpot = prizeIndex === 0;
+      if (isJackpot) {
+        statusChip.textContent = '恭喜抽中頭獎！';
+        resultMeta.textContent = `超級幸運！${nickname} 抽中了唯一頭獎！`;
+        drawDisplay.classList.add('jackpot');
+        playJackpotSound();
+        launchFireworks();
+      } else {
+        statusChip.textContent = '恭喜中獎！';
+        resultMeta.textContent = `${prizeName} 剩餘 ${remain} 個。`;
+        playWinSound();
+      }
+
+      nicknameInput.value = '';
+      isDrawing = false;
+      renderAll();
+      saveState();
+      if (!drawPool.length) {
+        statusChip.textContent = '全部抽完！';
+        resultMeta.textContent = '所有獎項都已抽出，可以按「重置本場抽獎」重新開始。';
+      }
+    }
+
+    function resetLottery() {
+      if (isDrawing) return;
+      const message = LOCK_EXPORTED_MODE
+        ? '確定要重置本場抽獎嗎？所有抽獎紀錄會清空，並恢復成匯出時的初始獎項數量。'
+        : '確定要重置抽獎嗎？目前紀錄會清空，並恢復各獎項數量。';
+      if (!confirm(message)) return;
+      resetToInitialState();
+    }
+
+    function addPrizeRow() {
+      if (LOCK_EXPORTED_MODE) return;
+      const labelIndex = Math.min(configPrizes.length, 26);
+      configPrizes.push({ name: `${String.fromCharCode(64 + labelIndex)}賞`, qty: 1 });
+      renderPrizeInputs();
+    }
+
+    function setSettingsHidden(hidden) {
+      if (LOCK_EXPORTED_MODE) {
+        pageRoot.classList.add('settings-hidden');
+        syncModeTip();
+        return;
+      }
+      pageRoot.classList.toggle('settings-hidden', hidden);
+      toggleSettingsBtn.textContent = hidden ? '顯示設定區' : '隱藏設定區';
+      syncModeTip();
+    }
+
+    function copyLogs() {
+      const text = logs.length
+        ? logs.map((l, i) => `${i + 1}. ${l.nickname} - ${l.prize}`).join('\n')
+        : '目前尚無抽獎紀錄';
+      navigator.clipboard.writeText(text).then(() => {
+        alert('抽獎紀錄已複製。');
+      }).catch(() => {
+        alert('無法自動複製，請手動複製。');
+      });
+    }
+
+    function buildExportState() {
+      return {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        appTitle,
+        configPrizes,
+        prizeStock,
+        initialPrizeStock,
+        drawPool,
+        logs,
+        soundEnabled,
+        titleValue: titleInput ? titleInput.value : appTitle
+      };
+    }
+
+    function exportStateToFile() {
+      try {
+        const state = buildExportState();
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = (appTitle || '抽獎紀錄').replace(/[\/:*?"<>|]/g, '_');
+        a.href = url;
+        a.download = `${safeName}_紀錄.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      } catch (error) {
+        alert('匯出紀錄失敗。');
+        console.error(error);
+      }
+    }
+
+    function applyImportedState(state) {
+      if (!state || typeof state !== 'object') throw new Error('匯入檔案格式錯誤');
+      if (!Array.isArray(state.prizeStock) || !Array.isArray(state.logs) || !Array.isArray(state.drawPool)) {
+        throw new Error('匯入檔案缺少必要資料');
+      }
+
+      appTitle = sanitizeName(state.appTitle, DEFAULT_TITLE);
+      if (titleInput) titleInput.value = state.titleValue || appTitle;
+      appTitleDisplay.textContent = appTitle;
+      document.title = appTitle;
+
+      soundEnabled = typeof state.soundEnabled === 'boolean' ? state.soundEnabled : true;
+      soundToggleBtn.textContent = soundEnabled ? '音效：開啟' : '音效：關閉';
+
+      configPrizes = Array.isArray(state.configPrizes) && state.configPrizes.length
+        ? deepClone(state.configPrizes)
+        : deepClone(DEFAULT_PRIZES);
+      prizeStock = deepClone(state.prizeStock);
+      initialPrizeStock = Array.isArray(state.initialPrizeStock) && state.initialPrizeStock.length
+        ? deepClone(state.initialPrizeStock)
+        : deepClone(state.prizeStock);
+      drawPool = deepClone(state.drawPool);
+      logs = deepClone(state.logs);
+
+      isDrawing = false;
+      nicknameInput.value = '';
+      renderAll();
+      updateResultToIdle();
+      renderInfo();
+      saveState();
+
+      if (!drawPool.length) {
+        statusChip.textContent = '已抽完';
+        resultMeta.textContent = '所有獎項都已抽出，可以按「重置本場抽獎」重新開始。';
+      }
+    }
+
+    function importStateFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const state = JSON.parse(event.target.result);
+          applyImportedState(state);
+          alert('匯入紀錄成功。');
+        } catch (error) {
+          alert('匯入失敗，請確認你選的是正確的紀錄檔。');
+          console.error(error);
+        } finally {
+          importStateInput.value = '';
+        }
+      };
+      reader.onerror = () => {
+        alert('讀取檔案失敗。');
+        importStateInput.value = '';
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function exportHtml() {
+      applyTitleFromInput();
+      const exportConfig = getNormalizedConfig();
+      exportConfig[0].qty = 1;
+      const currentSound = soundEnabled;
+      const safeTitle = appTitle.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const original = document.documentElement.outerHTML;
+      const replaced = original
+        .replace('const EXPORT_HIDE_SETTINGS = false;', 'const EXPORT_HIDE_SETTINGS = true;')
+        .replace('const LOCK_EXPORTED_MODE = false;', 'const LOCK_EXPORTED_MODE = true;')
+        .replace(/const DEFAULT_TITLE = '[^']*';/, `const DEFAULT_TITLE = '${safeTitle}';`)
+        .replace(/const DEFAULT_PRIZES = \[[\s\S]*?\n    ];/, `const DEFAULT_PRIZES = ${JSON.stringify(exportConfig, null, 2)};`)
+        .replace('let soundEnabled = true;', `let soundEnabled = ${currentSound};`)
+        .replace(/<title>.*?<\/title>/, `<title>${escapeHtml(appTitle)}</title>`);
+      const blob = new Blob([replaced], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '一番賞抽獎系統_Ultimate_活動版.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function init() {
+      createDefaultConfig();
+      const restored = loadState();
+      if (!restored) {
+        applyConfig(true);
+      } else {
+        renderAll();
+        updateResultToIdle();
+      }
+      soundToggleBtn.textContent = soundEnabled ? '音效：開啟' : '音效：關閉';
+      if (LOCK_EXPORTED_MODE) pageRoot.classList.add('locked-mode');
+      setSettingsHidden(EXPORT_HIDE_SETTINGS || LOCK_EXPORTED_MODE);
+      if (LOCK_EXPORTED_MODE) {
+        document.body.classList.add('locked-mode');
+        titleInput.disabled = true;
+      }
+      renderInfo();
+      saveState();
+    }
+
+    addPrizeBtn.addEventListener('click', addPrizeRow);
+    applyConfigBtn.addEventListener('click', () => {
+      applyConfig(true);
+      alert('設定已套用。');
+    });
+    exportBtn.addEventListener('click', exportHtml);
+    resetBtn.addEventListener('click', resetLottery);
+    drawBtn.addEventListener('click', drawLottery);
+    soundToggleBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggleBtn.textContent = soundEnabled ? '音效：開啟' : '音效：關閉';
+      saveState();
+    });
+    copyLogsBtn.addEventListener('click', copyLogs);
+    exportStateBtn.addEventListener('click', exportStateToFile);
+    importStateBtn.addEventListener('click', () => {
+      importStateInput.click();
+    });
+    importStateInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      importStateFromFile(file);
+    });
+    exportedResetBtn.addEventListener('click', resetLottery);
+    showSettingsBtn.addEventListener('click', () => setSettingsHidden(false));
+    hideSettingsBtn.addEventListener('click', () => setSettingsHidden(true));
+    toggleSettingsBtn.addEventListener('click', () => {
+      const hidden = pageRoot.classList.contains('settings-hidden');
+      setSettingsHidden(!hidden);
+    });
+    titleInput.addEventListener('input', applyTitleFromInput);
+    nicknameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') drawLottery();
+    });
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('fireworks');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    });
+
+    init();
+  </script>
+
+
+</body></html>
