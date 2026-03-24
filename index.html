@@ -1,59 +1,96 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
 <meta charset="UTF-8">
-<title>我的HTML入口</title>
+<title>丐幫電競</title>
 
 <style>
+
 body{
-    font-family: "Microsoft JhengHei", sans-serif;
+    font-family:"Microsoft JhengHei";
     background:#0f172a;
     color:white;
     text-align:center;
-    padding:40px;
+    padding:30px;
 }
 
+/* 標題 */
 h1{
     font-size:32px;
-    margin-bottom:30px;
 }
 
+/* 入口按鈕區 */
 .menu{
-    max-width:500px;
-    margin:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,200px);
+    gap:20px;
+    justify-content:center;
+    margin-top:40px;
 }
 
-a{
-    display:block;
+/* 按鈕卡片 */
+.card{
     background:#2563eb;
-    color:white;
-    text-decoration:none;
-    padding:15px;
-    margin:12px 0;
-    border-radius:12px;
+    padding:20px;
+    border-radius:15px;
     font-size:20px;
     transition:0.2s;
 }
 
-a:hover{
+.card:hover{
     background:#1d4ed8;
-    transform:scale(1.03);
+    transform:scale(1.05);
 }
+
+a{
+    text-decoration:none;
+    color:white;
+}
+
+/* 下方價格區 */
+.price{
+    margin-top:50px;
+    font-size:18px;
+}
+
+/* 備註 */
+.note{
+    margin-top:10px;
+    color:yellow;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h1>選擇要開啟的頁面</h1>
+<h1>選擇一番賞</h1>
 
 <div class="menu">
 
+<!-- 新增入口就在這裡 -->
+
 <a href="一番賞7.html">
+<div class="card">
 🎁 一番賞7
+</div>
 </a>
 
-<!-- 之後新增的頁面放這裡 -->
+</div>
+
+
+<!-- 下方金額區 -->
+
+<div class="price">
+
+<p>💰 1抽：200元</p>
+<p>💰 5抽：900元</p>
+
+<div class="note">
+📌 備註：抽出後不可退款
+</div>
 
 </div>
 
