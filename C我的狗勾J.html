@@ -115,7 +115,7 @@
     .result-prize { font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1.06; margin: 10px 0; text-shadow: 0 8px 30px rgba(0,0,0,.35); }
     .result-name { color: #cbd5e1; font-size: 1.02rem; }
     .result-meta { color: #e2e8f0; margin-top: 10px; font-size: 0.95rem; }
-    .stage-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .stage-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
     .stage-foot { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; color: var(--muted); font-size: 0.92rem; }
     .remaining-wrap, .leaderboard-wrap { display: grid; gap: 14px; }
     .summary-card { padding: 14px; border-radius: 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
@@ -160,7 +160,10 @@
     .locked-export #resetMasterBtn,
     .locked-export #showSettingsBtn,
     .locked-export #hideSettingsBtn,
-    .locked-export #masterOnlyTip { display: none !important; }
+    .locked-export #masterOnlyTip,
+    .locked-export #importSettingsBtn,
+    .locked-export #exportSettingsBtn,
+    .locked-export #importSettingsFile { display: none !important; }
 
     @media (max-width: 1240px) {
       .layout, .locked-export .layout { grid-template-columns: 1fr; }
@@ -210,7 +213,10 @@
             <button class="secondary" id="soundToggleBtn">音效：開啟</button>
             
             <button class="secondary" id="copyLogsBtn">複製紀錄</button>
+            <button class="secondary" id="exportSessionBtn">匯出紀錄</button>
+            <button class="secondary" id="importSessionBtn">匯入紀錄</button>
             <button class="danger" id="exportedResetBtn">重置本場抽獎</button>
+            <input id="importSessionFile" type="file" accept="application/json,.json" style="display:none">
           </div>
 
           <div class="stage-foot">
@@ -814,6 +820,12 @@
     const soundToggleBtn = document.getElementById('soundToggleBtn');
     const showSettingsBtn = document.getElementById('showSettingsBtn');
     const hideSettingsBtn = document.getElementById('hideSettingsBtn');
+    const importSettingsBtn = document.getElementById('importSettingsBtn');
+    const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+    const importSettingsFile = document.getElementById('importSettingsFile');
+    const exportSessionBtn = document.getElementById('exportSessionBtn');
+    const importSessionBtn = document.getElementById('importSessionBtn');
+    const importSessionFile = document.getElementById('importSessionFile');
 
     function deepClone(data) { return JSON.parse(JSON.stringify(data)); }
     function sanitizeName(name, fallback) {
@@ -1282,6 +1294,179 @@
       });
     }
 
+    function buildSessionPayload() {
+      return {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        title: appTitle,
+        initialSnapshot: deepClone(initialSnapshot),
+        prizeStock: deepClone(prizeStock),
+        logs: deepClone(logs),
+        totalTickets: prizeStock.reduce((sum, p) => sum + p.initialQty, 0),
+        remainingTickets: prizeStock.reduce((sum, p) => sum + p.remaining, 0),
+        leaderboard: prizeStock.map((p) => ({
+          prize: p.name,
+          winners: logs.filter((l) => l.prize === p.name).map((l) => l.nickname)
+        }))
+      };
+    }
+
+    function exportSession() {
+      const payload = buildSessionPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const safeFileName = (appTitle || '一番賞抽獎紀錄').replace(/[\/:*?"<>|]/g, '_').slice(0, 80) || '一番賞抽獎紀錄';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${safeFileName}_抽獎紀錄.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function importSessionFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const raw = JSON.parse(String(reader.result || '{}'));
+          const incomingInitial = Array.isArray(raw.initialSnapshot) ? raw.initialSnapshot : [];
+          const incomingStock = Array.isArray(raw.prizeStock) ? raw.prizeStock : [];
+          const incomingLogs = Array.isArray(raw.logs) ? raw.logs : [];
+          if (!incomingInitial.length || !incomingStock.length) throw new Error('紀錄檔缺少必要資料');
+
+          const normalizedInitial = incomingInitial.map((item, index) => ({
+            name: sanitizeName(item?.name, index === 0 ? '頭獎' : `獎項${index}`),
+            initialQty: Math.max(0, parseInt(item?.initialQty ?? (index === 0 ? 1 : 0), 10)),
+            remaining: Math.max(0, parseInt(item?.remaining ?? item?.initialQty ?? 0, 10)),
+            fixedJackpot: index === 0
+          })).filter((item, index) => index === 0 || item.initialQty > 0);
+          if (!normalizedInitial.length) throw new Error('紀錄檔沒有有效的初始獎項');
+          normalizedInitial[0].name = sanitizeName(normalizedInitial[0].name, '頭獎');
+          normalizedInitial[0].initialQty = 1;
+          normalizedInitial[0].remaining = Math.min(1, Math.max(0, parseInt(normalizedInitial[0].remaining ?? 1, 10)));
+
+          const initialMap = new Map(normalizedInitial.map((item) => [item.name, item.initialQty]));
+          const normalizedStock = incomingStock.map((item, index) => ({
+            name: sanitizeName(item?.name, index === 0 ? '頭獎' : `獎項${index}`),
+            initialQty: Math.max(0, parseInt(item?.initialQty ?? initialMap.get(item?.name) ?? (index === 0 ? 1 : 0), 10)),
+            remaining: Math.max(0, parseInt(item?.remaining ?? 0, 10)),
+            fixedJackpot: index === 0
+          })).filter((item, index) => index === 0 || item.initialQty > 0);
+          if (!normalizedStock.length) throw new Error('紀錄檔沒有有效的目前狀態');
+          normalizedStock[0].name = sanitizeName(normalizedStock[0].name, '頭獎');
+          normalizedStock[0].initialQty = 1;
+          normalizedStock[0].remaining = Math.min(1, Math.max(0, parseInt(normalizedStock[0].remaining ?? 1, 10)));
+
+          const keysA = normalizedInitial.map((item) => item.name).join('||');
+          const keysB = normalizedStock.map((item) => item.name).join('||');
+          if (keysA !== keysB) throw new Error('紀錄檔的獎項順序或名稱不一致');
+
+          normalizedStock.forEach((item, index) => {
+            const maxQty = normalizedInitial[index].initialQty;
+            item.initialQty = maxQty;
+            item.remaining = Math.min(maxQty, item.remaining);
+          });
+
+          const safeLogs = incomingLogs.slice(0, 5000).map((item, index) => ({
+            nickname: sanitizeName(item?.nickname, `參加者${index + 1}`),
+            prize: sanitizeName(item?.prize, normalizedStock[0]?.name || '頭獎')
+          })).filter((item) => normalizedStock.some((p) => p.name === item.prize));
+
+          const importedTitle = sanitizeName(raw.title, appTitle || DEFAULT_TITLE);
+          appTitle = importedTitle;
+          if (titleInput) titleInput.value = importedTitle;
+          if (heroTitle) heroTitle.textContent = importedTitle;
+          document.title = importedTitle;
+
+          initialSnapshot = deepClone(normalizedInitial);
+          prizeStock = deepClone(normalizedStock);
+          if (!LOCK_EXPORTED_MODE) {
+            configPrizes = normalizedInitial.map((item, index) => ({
+              name: item.name,
+              qty: index === 0 ? 1 : item.initialQty,
+              fixedJackpot: index === 0
+            }));
+            renderPrizeInputs();
+            updateConfigTotals();
+          }
+          logs = safeLogs;
+          rebuildPool();
+          renderAll();
+          updateResultToIdle();
+          alert('抽獎紀錄已匯入。');
+        } catch (error) {
+          console.error(error);
+          alert(`匯入紀錄失敗：${error && error.message ? error.message : '請確認 JSON 格式正確。'}`);
+        } finally {
+          if (importSessionFile) importSessionFile.value = '';
+        }
+      };
+      reader.onerror = () => {
+        alert('讀取抽獎紀錄檔失敗。');
+        if (importSessionFile) importSessionFile.value = '';
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function exportSettings() {
+      applyTitleFromInput();
+      const settingsPayload = {
+        title: appTitle,
+        prizes: getNormalizedConfig().map((p, index) => ({
+          name: p.name,
+          qty: index === 0 ? 1 : p.qty
+        }))
+      };
+      const blob = new Blob([JSON.stringify(settingsPayload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const safeFileName = (appTitle || '一番賞設定').replace(/[\\/:*?"<>|]/g, '_').slice(0, 80) || '一番賞設定';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${safeFileName}_設定.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function importSettingsFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const raw = JSON.parse(String(reader.result || '{}'));
+          const incomingTitle = sanitizeName(raw.title, DEFAULT_TITLE);
+          const incomingPrizes = Array.isArray(raw.prizes) ? raw.prizes : [];
+          if (!incomingPrizes.length) throw new Error('設定檔沒有獎項資料');
+          const normalized = incomingPrizes.map((item, index) => ({
+            name: sanitizeName(item?.name, index === 0 ? '頭獎' : `獎項${index}`),
+            qty: index === 0 ? 1 : Math.max(0, parseInt(item?.qty ?? 0, 10))
+          })).filter((item, index) => index === 0 || item.qty > 0);
+          if (!normalized.length) throw new Error('設定檔沒有有效獎項');
+          normalized[0].name = sanitizeName(normalized[0].name, '頭獎');
+          normalized[0].qty = 1;
+          appTitle = incomingTitle;
+          if (titleInput) titleInput.value = appTitle;
+          configPrizes = normalized.map((p, i) => ({ ...p, fixedJackpot: i === 0 }));
+          renderPrizeInputs();
+          applyConfig(true);
+          alert('設定已匯入並套用。');
+        } catch (error) {
+          console.error(error);
+          alert('匯入失敗：請確認 JSON 格式正確，且含有 title 與 prizes 資料。');
+        } finally {
+          if (importSettingsFile) importSettingsFile.value = '';
+        }
+      };
+      reader.onerror = () => {
+        alert('讀取設定檔失敗。');
+        if (importSettingsFile) importSettingsFile.value = '';
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
     function setSettingsHidden(hidden) {
       if (LOCK_EXPORTED_MODE) return;
       document.getElementById('settingsPanel').style.display = hidden ? 'none' : '';
@@ -1384,6 +1569,22 @@
 
     if (showSettingsBtn) showSettingsBtn.addEventListener('click', () => setSettingsHidden(false));
     if (hideSettingsBtn) hideSettingsBtn.addEventListener('click', () => setSettingsHidden(true));
+    if (exportSettingsBtn) exportSettingsBtn.addEventListener('click', exportSettings);
+    if (exportSessionBtn) exportSessionBtn.addEventListener('click', exportSession);
+    if (importSessionBtn) importSessionBtn.addEventListener('click', () => {
+      if (importSessionFile) importSessionFile.click();
+    });
+    if (importSettingsBtn) importSettingsBtn.addEventListener('click', () => {
+      if (importSettingsFile) importSettingsFile.click();
+    });
+    if (importSettingsFile) importSettingsFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      importSettingsFromFile(file);
+    });
+    if (importSessionFile) importSessionFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      importSessionFromFile(file);
+    });
     if (titleInput) titleInput.addEventListener('input', applyTitleFromInput);
     if (nicknameInput) nicknameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') drawLottery(); });
     window.addEventListener('resize', () => {
